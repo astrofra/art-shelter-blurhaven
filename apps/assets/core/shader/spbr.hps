@@ -1,0 +1,4 @@
+{
+	"features": ["OptionalBaseColorOpacityMap", "OptionalOcclusionRoughnessMetalnessMap", "OptionalNormalMap"],
+	"uniforms": [{"name": "uDetail", "type": "Vec4", "value": [0.0, 10.0, 10.0, 10.0]}]
+}
