@@ -14,7 +14,7 @@ hg.AddAssetsFolder('assets_compiled')
 pipeline = hg.CreateForwardPipeline()
 res = hg.PipelineResources()
 
-screen_prg = hg.LoadProgramFromAssets('shaders/video_stream.vsb', 'shaders/video_stream.fsb')
+screen_prg = hg.LoadProgramFromAssets('shaders/vhs_fx.vsb', 'shaders/vhs_fx.fsb')
 
 -- create a plane model for the final rendering stage
 local vtx_layout = hg.VertexLayoutPosFloatNormUInt8TexCoord0UInt8()
@@ -43,7 +43,7 @@ while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
 
 	val_uniforms = {}
 	_, texture, size, fmt = hg.UpdateTexture(streamer, handle, texture, size, fmt)
-	tex_uniforms = {hg.MakeUniformSetTexture('u_source', texture, 0)}
+	tex_uniforms = {hg.MakeUniformSetTexture('u_video', texture, 0)}
 
 	view_id = 0
 
