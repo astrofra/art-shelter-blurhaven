@@ -7,6 +7,8 @@ $input vTexCoord0
 
 #include <bgfx_shader.sh>
 
+uniform vec4 control; // VHS FX -> x : noise_intensity, y : fade
+
 SAMPLER2D(u_video, 0);
 SAMPLER2D(u_photo0, 1);
 SAMPLER2D(u_photo1, 2);
@@ -27,7 +29,7 @@ void main() {
 	intensity_accumulation = min(1.0, intensity_accumulation) * 0.1;
 	intensity_accumulation = max(0.0, intensity_accumulation - 0.05);
 
-	photo0 = texture2D(u_photo0, vTexCoord0 + vec2(intensity_accumulation, 0.0));
+	photo0 = texture2D(u_photo0, vTexCoord0 + vec2(intensity_accumulation * control.x, 0.0));
 
-	gl_FragColor = vhs_noise + photo0;
+	gl_FragColor = photo0 + vhs_noise * control.x;
 }

@@ -2,6 +2,7 @@
 -- Licensed under the MIT license. See LICENSE file in the project root for details.
 
 hg = require("harfang")
+require("utils")
 
 hg.InputInit()
 hg.WindowSystemInit()
@@ -38,18 +39,31 @@ streamer:Play(handle)
 
 -- photo
 local tex_photo0 = hg.LoadTextureFromAssets('photos/In_this_ghost_world_Im_going_to_disappear_if_I_cant_run.png', hg.TF_UClamp)
+local tex_photo1 = hg.LoadTextureFromAssets('photos/In_this_ghost_world_they_wont_let_me_in.png', hg.TF_UClamp)
 
+local fade = 0.0
+
+local noise_intensity = 0.0
 local angle = 0
+local clock
 
 while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
+	clock = hg.GetClock()
 	dt = hg.TickClock()
 	angle = angle + hg.time_to_sec_f(dt)
 
-	val_uniforms = {}
+	noise_intensity = make_triangle_wave(((hg.time_to_sec_f(clock) * 0.1)%1.0))
+
+	noise_intensity = clamp(map(noise_intensity, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
+
+	noise_intensity = noise_intensity * 10.0
+
+	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, fade, 0.0, 0.0))}
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),
-		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1)
+		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1),
+		hg.MakeUniformSetTexture('u_photo1', tex_photo0, 2)
 	}
 
 	view_id = 0
