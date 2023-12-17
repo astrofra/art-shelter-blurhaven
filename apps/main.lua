@@ -45,6 +45,7 @@ local fade = 0.0
 local noise_intensity = 0.0
 local angle = 0
 local clock, clock_s
+local swapped = 0
 
 while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
 	clock = hg.GetClock()
@@ -63,10 +64,19 @@ while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
 
 	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, fade, 0.0, 0.0))}
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
+
+	local uniform_photo0, uniform_photo1
+	if swapped then
+		uniform_photo0 = tex_photo0
+		uniform_photo1 = tex_photo1
+	else
+		uniform_photo0 = tex_photo1
+		uniform_photo1 = tex_photo0
+	end
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),
-		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1),
-		hg.MakeUniformSetTexture('u_photo1', tex_photo1, 2)
+		hg.MakeUniformSetTexture('u_photo0', uniform_photo0, 1),
+		hg.MakeUniformSetTexture('u_photo1', uniform_photo1, 2)
 	}
 
 	view_id = 0
