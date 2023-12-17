@@ -23,27 +23,34 @@ local screen_zoom = 1
 local screen_mdl = hg.CreatePlaneModel(vtx_layout, screen_zoom, screen_zoom * (res_y / res_x), 1, 1)
 local screen_ref = res:AddModel('screen', screen_mdl)
 
-texture = hg.CreateTexture(res_x, res_y, "Video texture", 0)
-size = hg.iVec2(res_x, res_y)
-fmt = hg.TF_RGB8
+-- video stream
+local tex_video = hg.CreateTexture(res_x, res_y, "Video texture", 0)
+local size = hg.iVec2(res_x, res_y)
+local fmt = hg.TF_RGB8
 
-streamer = hg.MakeVideoStreamer('hg_ffmpeg.dll')
+local streamer = hg.MakeVideoStreamer('hg_ffmpeg.dll')
 
 streamer:Startup()
 
-handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4');
+local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4');
 
 streamer:Play(handle)
 
-angle = 0
+-- photo
+local tex_photo0 = hg.LoadTextureFromAssets('photos/In_this_ghost_world_Im_going_to_disappear_if_I_cant_run.png', hg.TF_UClamp)
+
+local angle = 0
 
 while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
 	dt = hg.TickClock()
 	angle = angle + hg.time_to_sec_f(dt)
 
 	val_uniforms = {}
-	_, texture, size, fmt = hg.UpdateTexture(streamer, handle, texture, size, fmt)
-	tex_uniforms = {hg.MakeUniformSetTexture('u_video', texture, 0)}
+	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
+	tex_uniforms = {
+		hg.MakeUniformSetTexture('u_video', tex_video, 0),
+		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1)
+	}
 
 	view_id = 0
 
