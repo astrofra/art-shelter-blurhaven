@@ -1,8 +1,13 @@
 -- Copyright (c) NWNC HARFANG and contributors. All rights reserved.
 -- Licensed under the MIT license. See LICENSE file in the project root for details.
 
+function LoadPhotoFromTable(photo_table, photo_idx)
+	return hg.LoadTextureFromAssets('photos/' .. photo_table[photo_idx] .. '.png', hg.TF_UClamp)
+end
+
 hg = require("harfang")
 require("utils")
+require("states")
 
 hg.InputInit()
 hg.WindowSystemInit()
@@ -38,45 +43,106 @@ local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4');
 streamer:Play(handle)
 
 -- photo
-local tex_photo0 = hg.LoadTextureFromAssets('photos/In_this_ghost_world_Im_going_to_disappear_if_I_cant_run.png', hg.TF_UClamp)
-local tex_photo1 = hg.LoadTextureFromAssets('photos/In_this_ghost_world_they_wont_let_me_in.png', hg.TF_UClamp)
 
-local fade = 0.0
+local photo_table = {
+	"Empty_ghost_world",
+	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
+	"In_this_ghost_world_they_wont_let_me_in",
+	"In_this_ghost_world_we_are_still_waiting_for_closed_windows",
+	"In_this_ghost_world_you_dont_see_me",
+	"What_will_I_become_in_this_ghost_world"
+}
+local current_photo = 1
+local tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
+
 local noise_intensity = 0.0
-local angle = 0
-local clock, clock_s
-local swapped = 0
+local start_clock, clock, clock_s
 
-while not hg.ReadKeyboard('default'):Key(hg.K_Escape) do
-	clock = hg.GetClock()
+local keyboard = hg.Keyboard('raw')
+
+local state = GET_COMMAND
+
+-- function GetCommand(dt, keyboard, photo_table, noise_intensity)
+-- 	if keyboard:Released(hg.K_Space) then
+-- 		return NextPhoto, nil
+-- 	end
+
+-- 	return GetCommand, nil
+-- end
+
+-- function RampNoiseUp(dt, keyboard, photo_table, noise_intensity)
+-- end
+
+-- function NextPhoto(dt, keyboard, photo_table, noise_intensity)
+-- 	current_photo = current_photo + 1
+-- 	if current_photo > #photo_table then
+-- 		current_photo = 1
+-- 	end
+-- 	return GetCommand, LoadPhotoFromTable(photo_table, current_photo)
+-- end
+
+state_func = GET_COMMAND
+
+while not keyboard:Pressed(hg.K_Escape) do
+	keyboard:Update()
 	dt = hg.TickClock()
-	angle = angle + hg.time_to_sec_f(dt)
 
-	clock_s = hg.time_to_sec_f(clock) * 0.1
-	local fade = (clock_s * 2.0)%2.0
-	fade = clamp(map(fade, 0.995, 1.0, 0.0, 1.0), 0.0, 1.0)
+	if state == NOP then
+		--
+	elseif state == GET_COMMAND then
+		--
+		if keyboard:Released(hg.K_Space) then
+			state = LOAD_NEXT_PHOTO
+		end
+		--
+	elseif state == LOAD_NEXT_PHOTO then
+		--
+		current_photo = current_photo + 1
+		if current_photo > #photo_table then
+			current_photo = 1
+		end
+		next_tex = LoadPhotoFromTable(photo_table, current_photo)
+		start_clock = hg.GetClock()
+		state = RAMP_NOISE_UP
+		--
+	elseif state == RAMP_NOISE_UP then
+		--
+		clock = hg.GetClock() - start_clock
+		clock_s = hg.time_to_sec_f(clock)
+		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
 
-	noise_intensity = make_triangle_wave(clock_s%1.0)
+		if clock_s >= 1.0 then
+			noise_intensity = 1.0
+			state = SET_NEXT_PHOTO
+		end
+		--
+	elseif state == SET_NEXT_PHOTO then
+		--
+		tex_photo0 = next_tex
+		next_tex = nil
+		start_clock = hg.GetClock()
+		state = RAMP_NOISE_DOWN
+		--
+	elseif state == RAMP_NOISE_DOWN then
+		clock = hg.GetClock() - start_clock
+		clock_s = hg.time_to_sec_f(clock)
+		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
+		noise_intensity = 1.0 - noise_intensity
 
-	noise_intensity = clamp(map(noise_intensity, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
+		if clock_s >= 1.0 then
+			noise_intensity = 0.0
+			state = GET_COMMAND
+		end
+	end
 
-	noise_intensity = noise_intensity * 10.0
-
-	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, fade, 0.0, 0.0))}
+	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, 0.0, 0.0, 0.0))}
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 
-	local uniform_photo0, uniform_photo1
-	if swapped then
-		uniform_photo0 = tex_photo0
-		uniform_photo1 = tex_photo1
-	else
-		uniform_photo0 = tex_photo1
-		uniform_photo1 = tex_photo0
-	end
+	local uniform_photo0
+
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),
-		hg.MakeUniformSetTexture('u_photo0', uniform_photo0, 1),
-		hg.MakeUniformSetTexture('u_photo1', uniform_photo1, 2)
+		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1)
 	}
 
 	view_id = 0
