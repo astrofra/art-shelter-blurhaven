@@ -56,32 +56,12 @@ local current_photo = 1
 local tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
 
 local noise_intensity = 0.0
+local chroma_distortion = 0.0
 local start_clock, clock, clock_s
 
 local keyboard = hg.Keyboard('raw')
 
 local state = GET_COMMAND
-
--- function GetCommand(dt, keyboard, photo_table, noise_intensity)
--- 	if keyboard:Released(hg.K_Space) then
--- 		return NextPhoto, nil
--- 	end
-
--- 	return GetCommand, nil
--- end
-
--- function RampNoiseUp(dt, keyboard, photo_table, noise_intensity)
--- end
-
--- function NextPhoto(dt, keyboard, photo_table, noise_intensity)
--- 	current_photo = current_photo + 1
--- 	if current_photo > #photo_table then
--- 		current_photo = 1
--- 	end
--- 	return GetCommand, LoadPhotoFromTable(photo_table, current_photo)
--- end
-
-state_func = GET_COMMAND
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
@@ -135,7 +115,9 @@ while not keyboard:Pressed(hg.K_Escape) do
 		end
 	end
 
-	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, 0.0, 0.0, 0.0))}
+	chroma_distortion = clamp(map(noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
+	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, chroma_distortion, 0.0, 0.0))}
+	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))}
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 
 	local uniform_photo0
