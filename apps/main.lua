@@ -35,12 +35,10 @@ local size = hg.iVec2(res_x, res_y)
 local fmt = hg.TF_RGB8
 
 local streamer = hg.MakeVideoStreamer('hg_ffmpeg.dll')
-
 streamer:Startup()
-
-local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4');
-
+local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4')
 streamer:Play(handle)
+local video_start_clock = hg.GetClock()
 
 -- photo
 
@@ -62,6 +60,8 @@ local start_clock, clock, clock_s
 local keyboard = hg.Keyboard('raw')
 
 local state = GET_COMMAND
+
+local c = 0
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
@@ -117,7 +117,7 @@ while not keyboard:Pressed(hg.K_Escape) do
 
 	chroma_distortion = clamp(map(noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
 	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, chroma_distortion, 0.0, 0.0))}
-	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))}
+	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))} -- test only
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 
 	local uniform_photo0
@@ -133,8 +133,9 @@ while not keyboard:Pressed(hg.K_Escape) do
 
 	hg.DrawModel(view_id, screen_mdl, screen_prg, val_uniforms, tex_uniforms, hg.TransformationMat4(hg.Vec3(0, 0, 0), hg.Vec3(math.pi / 2, math.pi, 0)))
 
-	if streamer:GetTimeStamp(handle) > hg.time_from_sec_f(85.0) then
-		print(streamer:GetTimeStamp(handle) .. " / " .. streamer:GetDuration(handle))
+	if hg.GetClock() - video_start_clock > hg.time_from_sec_f(85.0) then
+		video_start_clock = hg.GetClock()
+		print("Restart VHS tape!")
 		streamer:Seek(handle, 0)
 		streamer:Play(handle)
 	end
