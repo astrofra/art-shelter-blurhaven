@@ -8,6 +8,24 @@ function clamp(value, min1, max1)
     return math.min(math.max(value, min1), max1)
 end
 
+function make_triangle_wave(i)
+-- 1 ^   ^
+--   |  / \
+--   | /   \
+--   |/     \
+--   +-------->
+-- 0    0.5    1
+    local s = i >= 0 and 1 or -1
+    i = math.abs(i)
+
+    if i < 0.5 then
+        return s * i * 2.0
+    else
+        return s * (1.0 - (2.0 * (i - 0.5)))
+    end
+end
+
+
 -- Frame rate independent damping using Lerp.
 -- Takes into account delta time to provide consistent damping across variable frame rates.
 function dtAwareDamp(source, target, smoothing, dt)
