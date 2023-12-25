@@ -1,21 +1,22 @@
 hg = require("harfang")
 require("utils")
 
-function PhotoChangeCoroutine()
+function PhotoChangeCoroutine(state)
     -- load next photo
-    current_photo = current_photo + 1
-    if current_photo > #photo_table then
-        current_photo = 1
+    state.current_photo = state.current_photo + 1
+    if state.current_photo > #state.photo_table then
+        state.current_photo = 1
     end
-    next_tex = LoadPhotoFromTable(photo_table, current_photo)
+    state.next_tex = LoadPhotoFromTable(state.photo_table, state.current_photo)
     coroutine.yield()
     
     -- ramp up the noise intensity
-    start_clock = hg.GetClock()
+    local start_clock = hg.GetClock()
+    local clock
     while true do
         clock = hg.GetClock() - start_clock
         clock_s = hg.time_to_sec_f(clock)
-        noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
+        state.noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
         if clock_s >= 1.0 then
             break
         end
@@ -23,9 +24,9 @@ function PhotoChangeCoroutine()
     end
 
     -- next photo
-    noise_intensity = 1.0
-    tex_photo0 = next_tex
-    next_tex = nil
+    state.noise_intensity = 1.0
+    state.tex_photo0 = state.next_tex
+    state.next_tex = nil
     coroutine.yield()
     
     -- ramp down the noise intensity
@@ -33,14 +34,14 @@ function PhotoChangeCoroutine()
     while true do
         clock = hg.GetClock() - start_clock
         clock_s = hg.time_to_sec_f(clock)
-        noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
-        noise_intensity = 1.0 - noise_intensity
+        state.noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
+        state.noise_intensity = 1.0 - state.noise_intensity
         if clock_s >= 1.0 then
             break
         end
         coroutine.yield()
     end
 
-    noise_intensity = 0.0
+    state.noise_intensity = 0.0
     coroutine.yield()
 end

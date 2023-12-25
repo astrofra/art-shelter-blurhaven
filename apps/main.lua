@@ -1,8 +1,8 @@
 -- Copyright (c) NWNC HARFANG and contributors. All rights reserved.
 -- Licensed under the MIT license. See LICENSE file in the project root for details.
 
-function LoadPhotoFromTable(photo_table, photo_idx)
-	return hg.LoadTextureFromAssets('photos/' .. photo_table[photo_idx] .. '.png', hg.TF_UClamp)
+function LoadPhotoFromTable(_photo_table, _photo_idx)
+	return hg.LoadTextureFromAssets('photos/' .. _photo_table[_photo_idx] .. '.png', hg.TF_UClamp)
 end
 
 hg = require("harfang")
@@ -40,9 +40,19 @@ local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4')
 streamer:Play(handle)
 local video_start_clock = hg.GetClock()
 
+-- state context
+local photo_state = {
+    current_photo = nil,
+    photo_table = nil,
+    next_tex = nil,
+    tex_photo0 = nil,
+    noise_intensity = nil,
+    coroutine = nil
+}
+
 -- photo
 
-photo_table = {
+photo_state.photo_table = {
 	"Empty_ghost_world",
 	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
 	"In_this_ghost_world_they_wont_let_me_in",
@@ -51,11 +61,12 @@ photo_table = {
 	"What_will_I_become_in_this_ghost_world"
 }
 
-current_photo = 1
-next_tex = nil
-tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
 
-noise_intensity = 0.0
+photo_state.current_photo = 1
+photo_state.next_tex = nil
+photo_state.tex_photo0 = LoadPhotoFromTable(photo_state.photo_table, photo_state.current_photo)
+
+photo_state.noise_intensity = 0.0
 chroma_distortion = 0.0
 
 local keyboard = hg.Keyboard('raw')
@@ -66,22 +77,22 @@ while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
 	dt = hg.TickClock()
 
-	if current_coroutine == nil and keyboard:Released(hg.K_Space) then
-		current_coroutine = coroutine.create(PhotoChangeCoroutine)
-	elseif current_coroutine and coroutine.status(current_coroutine) ~= 'dead' then
-		coroutine.resume(current_coroutine)
+	if photo_state.coroutine == nil and keyboard:Released(hg.K_Space) then
+		photo_state.coroutine = coroutine.create(PhotoChangeCoroutine)
+	elseif photo_state.coroutine and coroutine.status(photo_state.coroutine) ~= 'dead' then
+		coroutine.resume(photo_state.coroutine, photo_state)
 	else
-		current_coroutine = nil
+		photo_state.coroutine = nil
 	end
 
-	chroma_distortion = clamp(map(noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
-	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, chroma_distortion, 0.0, 0.0))}
+	chroma_distortion = clamp(map(photo_state.noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
+	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(photo_state.noise_intensity, chroma_distortion, 0.0, 0.0))}
 	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))} -- test only
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),
-		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1)
+		hg.MakeUniformSetTexture('u_photo0', photo_state.tex_photo0, 1)
 	}
 
 	view_id = 0
