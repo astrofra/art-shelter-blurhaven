@@ -66,7 +66,6 @@ local photo_state = {
 }
 
 -- photo
-
 photo_state.photo_table = {
 	"Empty_ghost_world",
 	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
@@ -76,7 +75,6 @@ photo_state.photo_table = {
 	"What_will_I_become_in_this_ghost_world"
 }
 
-
 photo_state.current_photo = 1
 photo_state.next_tex = nil
 photo_state.tex_photo0 = LoadPhotoFromTable(photo_state.photo_table, photo_state.current_photo)
@@ -85,9 +83,10 @@ photo_state.index_photo0 = photo_state.current_photo
 photo_state.noise_intensity = 0.0
 chroma_distortion = 0.0
 
-local keyboard = hg.Keyboard('raw')
+local zoom_level = 1.125
+zoom_level = 1.0 / zoom_level
 
-local current_coroutine = nil
+local keyboard = hg.Keyboard('raw')
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
@@ -113,7 +112,7 @@ while not keyboard:Pressed(hg.K_Escape) do
 
 	view_id = 0
 
-	hg.SetViewPerspective(view_id, 0, 0, res_x, res_y, hg.TranslationMat4(hg.Vec3(0, 0, -0.68)))
+	hg.SetViewPerspective(view_id, 0, 0, res_x, res_y, hg.TranslationMat4(hg.Vec3(0, 0, -0.68 * zoom_level)))
 
 	hg.DrawModel(view_id, screen_mdl, screen_prg, val_uniforms, tex_uniforms, hg.TransformationMat4(hg.Vec3(0, 0, 0), hg.Vec3(math.pi / 2, math.pi, 0)))
 
