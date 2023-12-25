@@ -1,13 +1,13 @@
 -- Copyright (c) NWNC HARFANG and contributors. All rights reserved.
 -- Licensed under the MIT license. See LICENSE file in the project root for details.
 
-function LoadPhotoFromTable(photo_table, photo_idx)
-	return hg.LoadTextureFromAssets('photos/' .. photo_table[photo_idx] .. '.png', hg.TF_UClamp)
+function LoadPhotoFromTable(_photo_table, _photo_idx)
+	return hg.LoadTextureFromAssets('photos/' .. _photo_table[_photo_idx] .. '.png', hg.TF_UClamp)
 end
 
 hg = require("harfang")
 require("utils")
-require("states")
+require("coroutines")
 
 hg.InputInit()
 hg.WindowSystemInit()
@@ -40,9 +40,19 @@ local handle = streamer:Open('assets_compiled/videos/noise-512x512.mp4')
 streamer:Play(handle)
 local video_start_clock = hg.GetClock()
 
+-- state context
+local photo_state = {
+    current_photo = nil,
+    photo_table = nil,
+    next_tex = nil,
+    tex_photo0 = nil,
+    noise_intensity = nil,
+    coroutine = nil
+}
+
 -- photo
 
-local photo_table = {
+photo_state.photo_table = {
 	"Empty_ghost_world",
 	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
 	"In_this_ghost_world_they_wont_let_me_in",
@@ -50,81 +60,39 @@ local photo_table = {
 	"In_this_ghost_world_you_dont_see_me",
 	"What_will_I_become_in_this_ghost_world"
 }
-local current_photo = 1
-local tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
 
-local noise_intensity = 0.0
-local chroma_distortion = 0.0
-local start_clock, clock, clock_s
+
+photo_state.current_photo = 1
+photo_state.next_tex = nil
+photo_state.tex_photo0 = LoadPhotoFromTable(photo_state.photo_table, photo_state.current_photo)
+
+photo_state.noise_intensity = 0.0
+chroma_distortion = 0.0
 
 local keyboard = hg.Keyboard('raw')
 
-local state = GET_COMMAND
-
-local c = 0
+local current_coroutine = nil
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
 	dt = hg.TickClock()
 
-	if state == NOP then
-		--
-	elseif state == GET_COMMAND then
-		--
-		if keyboard:Released(hg.K_Space) then
-			state = LOAD_NEXT_PHOTO
-		end
-		--
-	elseif state == LOAD_NEXT_PHOTO then
-		--
-		current_photo = current_photo + 1
-		if current_photo > #photo_table then
-			current_photo = 1
-		end
-		next_tex = LoadPhotoFromTable(photo_table, current_photo)
-		start_clock = hg.GetClock()
-		state = RAMP_NOISE_UP
-		--
-	elseif state == RAMP_NOISE_UP then
-		--
-		clock = hg.GetClock() - start_clock
-		clock_s = hg.time_to_sec_f(clock)
-		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
-
-		if clock_s >= 1.0 then
-			noise_intensity = 1.0
-			state = SET_NEXT_PHOTO
-		end
-		--
-	elseif state == SET_NEXT_PHOTO then
-		--
-		tex_photo0 = next_tex
-		next_tex = nil
-		start_clock = hg.GetClock()
-		state = RAMP_NOISE_DOWN
-		--
-	elseif state == RAMP_NOISE_DOWN then
-		clock = hg.GetClock() - start_clock
-		clock_s = hg.time_to_sec_f(clock)
-		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
-		noise_intensity = 1.0 - noise_intensity
-
-		if clock_s >= 1.0 then
-			noise_intensity = 0.0
-			state = GET_COMMAND
-		end
+	if photo_state.coroutine == nil and keyboard:Released(hg.K_Space) then
+		photo_state.coroutine = coroutine.create(PhotoChangeCoroutine)
+	elseif photo_state.coroutine and coroutine.status(photo_state.coroutine) ~= 'dead' then
+		coroutine.resume(photo_state.coroutine, photo_state)
+	else
+		photo_state.coroutine = nil
 	end
 
-	chroma_distortion = clamp(map(noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
-	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, chroma_distortion, 0.0, 0.0))}
+	chroma_distortion = clamp(map(photo_state.noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
+	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(photo_state.noise_intensity, chroma_distortion, 0.0, 0.0))}
 	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))} -- test only
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
 
-	local uniform_photo0
-
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),
-		hg.MakeUniformSetTexture('u_photo0', tex_photo0, 1)
+		hg.MakeUniformSetTexture('u_photo0', photo_state.tex_photo0, 1)
 	}
 
 	view_id = 0
