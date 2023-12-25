@@ -20,6 +20,17 @@ hg.AddAssetsFolder('assets_compiled')
 pipeline = hg.CreateForwardPipeline()
 res = hg.PipelineResources()
 
+-- text rendering
+-- load font and shader program
+local font_size = 52
+local font = hg.LoadFontFromAssets('fonts/VCR_OSD_MONO.ttf', font_size)
+local font_program = hg.LoadProgramFromAssets('core/shader/font')
+
+-- text uniforms and render state
+local text_uniform_values = {hg.MakeUniformSetValue('u_color', hg.Vec4(1, 1, 0, 1))}
+local text_render_state = hg.ComputeRenderState(hg.BM_Alpha, hg.DT_Always, hg.FC_Disabled)
+
+-- VHS fx shader
 screen_prg = hg.LoadProgramFromAssets('shaders/vhs_fx.vsb', 'shaders/vhs_fx.fsb')
 
 -- create a plane model for the final rendering stage
@@ -46,6 +57,7 @@ local photo_state = {
     photo_table = nil,
     next_tex = nil,
     tex_photo0 = nil,
+	index_photo0 = nil,
     noise_intensity = nil,
     coroutine = nil
 }
@@ -65,6 +77,7 @@ photo_state.photo_table = {
 photo_state.current_photo = 1
 photo_state.next_tex = nil
 photo_state.tex_photo0 = LoadPhotoFromTable(photo_state.photo_table, photo_state.current_photo)
+photo_state.index_photo0 = photo_state.current_photo
 
 photo_state.noise_intensity = 0.0
 chroma_distortion = 0.0
@@ -101,6 +114,24 @@ while not keyboard:Pressed(hg.K_Escape) do
 
 	hg.DrawModel(view_id, screen_mdl, screen_prg, val_uniforms, tex_uniforms, hg.TransformationMat4(hg.Vec3(0, 0, 0), hg.Vec3(math.pi / 2, math.pi, 0)))
 
+	-- text OSD
+	osd_text = "PH" .. photo_state.index_photo0
+	view_id = view_id + 1
+
+	hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)
+
+	local text_pos = hg.Vec3(res_x * 0.05, res_y * 0.05, -0.5)
+	local _osd_colors = {hg.Vec4(1.0, 0.0, 0.0, 0.8), hg.Vec4(0.0, 1.0, 0.0, 0.8), hg.Vec4(1.0, 1.0, 1.0, 1.0)}
+	local _osd_offsets = {-2.0, 1.0, 0.0}
+	for _text_loop = 1, 3 do
+		local _text_offset = hg.Vec3(res_x * 0.001 * _osd_offsets[_text_loop] * photo_state.noise_intensity, 0.0, 0.0)
+		hg.DrawText(view_id, font, osd_text, font_program, 'u_tex', 0, 
+				hg.Mat4.Identity, text_pos + _text_offset, hg.DTHA_Left, hg.DTVA_Bottom, 
+				{hg.MakeUniformSetValue('u_color', _osd_colors[_text_loop])}, 
+				{}, text_render_state)
+	end
+
+	-- loop noise video
 	if hg.GetClock() - video_start_clock > hg.time_from_sec_f(85.0) then
 		video_start_clock = hg.GetClock()
 		print("Restart VHS tape!")
