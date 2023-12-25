@@ -7,7 +7,7 @@ end
 
 hg = require("harfang")
 require("utils")
-require("states")
+require("coroutines")
 
 hg.InputInit()
 hg.WindowSystemInit()
@@ -50,77 +50,39 @@ local photo_table = {
 	"In_this_ghost_world_you_dont_see_me",
 	"What_will_I_become_in_this_ghost_world"
 }
+
 local current_photo = 1
+local next_tex = nil
 local tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
 
 local noise_intensity = 0.0
 local chroma_distortion = 0.0
-local start_clock, clock, clock_s
 
 local keyboard = hg.Keyboard('raw')
 
-local state = GET_COMMAND
-
-local c = 0
+local current_coroutine = nil
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
 	dt = hg.TickClock()
 
-	if state == NOP then
-		--
-	elseif state == GET_COMMAND then
-		--
-		if keyboard:Released(hg.K_Space) then
-			state = LOAD_NEXT_PHOTO
-		end
-		--
-	elseif state == LOAD_NEXT_PHOTO then
-		--
-		current_photo = current_photo + 1
-		if current_photo > #photo_table then
-			current_photo = 1
-		end
-		next_tex = LoadPhotoFromTable(photo_table, current_photo)
-		start_clock = hg.GetClock()
-		state = RAMP_NOISE_UP
-		--
-	elseif state == RAMP_NOISE_UP then
-		--
-		clock = hg.GetClock() - start_clock
-		clock_s = hg.time_to_sec_f(clock)
-		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
-
-		if clock_s >= 1.0 then
-			noise_intensity = 1.0
-			state = SET_NEXT_PHOTO
-		end
-		--
-	elseif state == SET_NEXT_PHOTO then
-		--
-		tex_photo0 = next_tex
-		next_tex = nil
-		start_clock = hg.GetClock()
-		state = RAMP_NOISE_DOWN
-		--
-	elseif state == RAMP_NOISE_DOWN then
-		clock = hg.GetClock() - start_clock
-		clock_s = hg.time_to_sec_f(clock)
-		noise_intensity = clock_s + 2.0 * clamp(map(clock_s, 0.8, 1.0, 0.0, 1.0), 0.0, 1.0)
-		noise_intensity = 1.0 - noise_intensity
-
-		if clock_s >= 1.0 then
-			noise_intensity = 0.0
-			state = GET_COMMAND
-		end
+	if current_coroutine == nil and keyboard:Released(hg.K_Space) then
+		current_coroutine = coroutine.create(PhotoChangeCoroutine)
+	elseif current_coroutine and coroutine.status(current_coroutine) ~= 'dead' then
+		local _success, _current_photo, _photo_table, _next_tex, _tex_photo0, _noise_intensity
+		_success, _current_photo, _photo_table, _next_tex, _tex_photo0, _noise_intensity = coroutine.resume(current_coroutine, current_photo, photo_table, next_tex, tex_photo0)
+		current_photo = _current_photo or current_photo
+		photo_table = _photo_table or photo_table
+		tex_photo0 = _tex_photo0 or tex_photo0
+		noise_intensity = _noise_intensity or noise_intensity
+	else
+		current_coroutine = nil
 	end
 
 	chroma_distortion = clamp(map(noise_intensity, 0.1, 0.5, 0.0, 1.0), 0.0, 1.0)
 	val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(noise_intensity, chroma_distortion, 0.0, 0.0))}
 	-- val_uniforms = {hg.MakeUniformSetValue('control', hg.Vec4(1.0, 1.0, 0.0, 0.0))} -- test only
 	_, tex_video, size, fmt = hg.UpdateTexture(streamer, handle, tex_video, size, fmt)
-
-	local uniform_photo0
 
 	tex_uniforms = {
 		hg.MakeUniformSetTexture('u_video', tex_video, 0),

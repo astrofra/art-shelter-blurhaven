@@ -1,7 +1,9 @@
 hg = require("harfang")
+require("utils")
 
 function PhotoChangeCoroutine(current_photo, photo_table, next_tex, tex_photo0)
-    local clock, start_clock, noise_intensity
+    local clock, start_clock
+    local noise_intensity = 0.0
 
     -- load next photo
     current_photo = current_photo + 1
