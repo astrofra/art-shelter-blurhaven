@@ -12,7 +12,10 @@ require("coroutines")
 hg.InputInit()
 hg.WindowSystemInit()
 
+-- res_x, res_y = 800, 600
 res_x, res_y = 960, 720
+-- res_x, res_y = math.floor(1080 * (4/3)), 1080
+
 win = hg.RenderInit('Blurhaven', res_x, res_y, hg.RF_VSync)
 
 hg.AddAssetsFolder('assets_compiled')
@@ -22,7 +25,7 @@ res = hg.PipelineResources()
 
 -- text rendering
 -- load font and shader program
-local font_size = 52
+local font_size = math.floor(52 * (res_x / 960.0))
 local font = hg.LoadFontFromAssets('fonts/VCR_OSD_MONO.ttf', font_size)
 local font_program = hg.LoadProgramFromAssets('core/shader/font')
 
