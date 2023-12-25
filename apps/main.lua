@@ -42,7 +42,7 @@ local video_start_clock = hg.GetClock()
 
 -- photo
 
-local photo_table = {
+photo_table = {
 	"Empty_ghost_world",
 	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
 	"In_this_ghost_world_they_wont_let_me_in",
@@ -51,12 +51,12 @@ local photo_table = {
 	"What_will_I_become_in_this_ghost_world"
 }
 
-local current_photo = 1
-local next_tex = nil
-local tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
+current_photo = 1
+next_tex = nil
+tex_photo0 = LoadPhotoFromTable(photo_table, current_photo)
 
-local noise_intensity = 0.0
-local chroma_distortion = 0.0
+noise_intensity = 0.0
+chroma_distortion = 0.0
 
 local keyboard = hg.Keyboard('raw')
 
@@ -69,12 +69,7 @@ while not keyboard:Pressed(hg.K_Escape) do
 	if current_coroutine == nil and keyboard:Released(hg.K_Space) then
 		current_coroutine = coroutine.create(PhotoChangeCoroutine)
 	elseif current_coroutine and coroutine.status(current_coroutine) ~= 'dead' then
-		local _success, _current_photo, _photo_table, _next_tex, _tex_photo0, _noise_intensity
-		_success, _current_photo, _photo_table, _next_tex, _tex_photo0, _noise_intensity = coroutine.resume(current_coroutine, current_photo, photo_table, next_tex, tex_photo0)
-		current_photo = _current_photo or current_photo
-		photo_table = _photo_table or photo_table
-		tex_photo0 = _tex_photo0 or tex_photo0
-		noise_intensity = _noise_intensity or noise_intensity
+		coroutine.resume(current_coroutine)
 	else
 		current_coroutine = nil
 	end

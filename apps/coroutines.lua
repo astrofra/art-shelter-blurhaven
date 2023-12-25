@@ -1,17 +1,14 @@
 hg = require("harfang")
 require("utils")
 
-function PhotoChangeCoroutine(current_photo, photo_table, next_tex, tex_photo0)
-    local clock, start_clock
-    local noise_intensity = 0.0
-
+function PhotoChangeCoroutine()
     -- load next photo
     current_photo = current_photo + 1
     if current_photo > #photo_table then
         current_photo = 1
     end
     next_tex = LoadPhotoFromTable(photo_table, current_photo)
-    coroutine.yield(current_photo, photo_table, next_tex, tex_photo0, noise_intensity)
+    coroutine.yield()
     
     -- ramp up the noise intensity
     start_clock = hg.GetClock()
@@ -22,14 +19,14 @@ function PhotoChangeCoroutine(current_photo, photo_table, next_tex, tex_photo0)
         if clock_s >= 1.0 then
             break
         end
-        coroutine.yield(current_photo, photo_table, next_tex, tex_photo0, noise_intensity)
+        coroutine.yield()
     end
 
     -- next photo
     noise_intensity = 1.0
     tex_photo0 = next_tex
     next_tex = nil
-    coroutine.yield(current_photo, photo_table, next_tex, tex_photo0, noise_intensity)
+    coroutine.yield()
     
     -- ramp down the noise intensity
     start_clock = hg.GetClock()
@@ -41,9 +38,9 @@ function PhotoChangeCoroutine(current_photo, photo_table, next_tex, tex_photo0)
         if clock_s >= 1.0 then
             break
         end
-        coroutine.yield(current_photo, photo_table, next_tex, tex_photo0, noise_intensity)
+        coroutine.yield()
     end
 
     noise_intensity = 0.0
-    coroutine.yield(current_photo, photo_table, next_tex, tex_photo0, noise_intensity)
+    coroutine.yield()
 end
