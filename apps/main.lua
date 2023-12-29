@@ -11,6 +11,7 @@ require("coroutines")
 
 hg.InputInit()
 hg.WindowSystemInit()
+hg.AudioInit()
 
 -- res_x, res_y = 800, 600
 -- res_x, res_y = 768, 576
@@ -63,7 +64,8 @@ local photo_state = {
     tex_photo0 = nil,
 	index_photo0 = nil,
     noise_intensity = nil,
-    coroutine = nil
+    coroutine = nil,
+	sounds = {}
 }
 
 -- photo
@@ -75,6 +77,16 @@ photo_state.photo_table = {
 	"In_this_ghost_world_you_dont_see_me",
 	"What_will_I_become_in_this_ghost_world"
 }
+
+-- audio
+-- background noise
+local bg_snd_ref = hg.LoadWAVSoundAsset('sfx/static.wav')
+local bg_src_ref = hg.PlayStereo(bg_snd_ref, hg.StereoSourceState(1, hg.SR_Loop))
+
+-- photo change fx
+for snd_idx = 0, 4 do
+	photo_state.sounds[snd_idx + 1] = hg.LoadWAVSoundAsset('sfx/change' .. snd_idx .. '.wav') 
+end
 
 photo_state.current_photo = 1
 photo_state.next_tex = nil
@@ -118,7 +130,7 @@ while not keyboard:Pressed(hg.K_Escape) do
 	hg.DrawModel(view_id, screen_mdl, screen_prg, val_uniforms, tex_uniforms, hg.TransformationMat4(hg.Vec3(0, 0, 0), hg.Vec3(math.pi / 2, math.pi, 0)))
 
 	-- text OSD
-	osd_text = "PH" .. photo_state.index_photo0
+	osd_text = "TV" .. photo_state.index_photo0
 	view_id = view_id + 1
 
 	hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)

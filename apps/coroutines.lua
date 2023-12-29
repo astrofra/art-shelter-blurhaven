@@ -23,6 +23,9 @@ function PhotoChangeCoroutine(state)
         coroutine.yield()
     end
 
+    -- sound fx
+    local src_ref = hg.PlayStereo(state.sounds[math.random(1, #state.sounds)], hg.StereoSourceState(1, hg.SR_Once))
+
     -- next photo
     state.noise_intensity = 1.0
     state.tex_photo0 = state.next_tex
