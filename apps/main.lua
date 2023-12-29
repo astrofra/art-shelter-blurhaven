@@ -13,8 +13,8 @@ hg.InputInit()
 hg.WindowSystemInit()
 hg.AudioInit()
 
--- res_x, res_y = 800, 600
 -- res_x, res_y = 768, 576
+-- res_x, res_y = 800, 600
 res_x, res_y = 960, 720
 -- res_x, res_y = math.floor(1080 * (4/3)), 1080
 
