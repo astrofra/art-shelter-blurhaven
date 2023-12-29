@@ -7,18 +7,42 @@ end
 
 hg = require("harfang")
 require("utils")
+require("arguments")
 require("coroutines")
 
 hg.InputInit()
 hg.WindowSystemInit()
 hg.AudioInit()
 
--- res_x, res_y = 768, 576
--- res_x, res_y = 800, 600
-res_x, res_y = 960, 720
--- res_x, res_y = math.floor(1080 * (4/3)), 1080
+-- local res_x, res_y = 768, 576
+-- local res_x, res_y = 800, 600
+local res_x, res_y = 960, 720
+-- local res_x, res_y = math.floor(1080 * (4/3)), 1080
+local default_window_mode = hg.WV_Windowed
 
-win = hg.RenderInit('Blurhaven', res_x, res_y, hg.RF_VSync)
+local options = parseArgs(arg)
+local screen_modes = {
+	Windowed = hg.WV_Windowed,
+    Undecorated = hg.WV_Undecorated,
+    Fullscreen = hg.WV_Fullscreen,
+    Hidden = hg.WV_Hidden,
+    FullscreenMonitor1 = hg.WV_FullscreenMonitor1,
+    FullscreenMonitor2 = hg.WV_FullscreenMonitor2,
+    FullscreenMonitor3 = hg.WV_FullscreenMonitor3
+}
+if options.output then
+	default_window_mode = screen_modes[options.output]
+end
+if options.width then
+	res_x = options.width
+end
+if options.height then
+	res_y = options.height
+end
+
+local win = hg.NewWindow('Blurhaven', res_x, res_y, 32, default_window_mode) --, hg.WV_Fullscreen)
+hg.RenderInit(win)
+hg.RenderReset(res_x, res_y, hg.RF_VSync | hg.RF_MSAA4X | hg.RF_MaxAnisotropy)
 
 hg.AddAssetsFolder('assets_compiled')
 
