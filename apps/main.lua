@@ -51,7 +51,7 @@ res = hg.PipelineResources()
 
 -- text rendering
 -- load font and shader program
-local max_font_index = 15 -- Vous pouvez changer cette valeur selon vos besoins
+local max_font_index = 440
 local font_size = math.floor(60 * (res_x / 960.0))
 local font = {}
 
@@ -112,7 +112,7 @@ photo_state.photo_table = {
 	"in_this_ghost_world_i_just_try_to_walk",
 	"in_this_ghost_world_i_m_falling_apart",
 	"in_this_ghost_world_nothing_happens",
-	"in_this_ghost_world_they_wont_let_me_in",
+	-- "in_this_ghost_world_they_wont_let_me_in",
 	"in_this_ghost_world_they_won_t_let_me_in",
 	"in_this_ghost_world_the_light_stays_outside",
 	"in_this_ghost_world_we_are_still_waiting_for_closed_windows",
@@ -135,7 +135,7 @@ local ghostWorldAssociations = {
 	"Endurance",
 	"Dissolution",
 	"Stagnation",
-	"Exclusion",
+	-- "Exclusion",
 	"Banishment",
 	"Darkness",
 	"Anticipation",
@@ -174,6 +174,8 @@ zoom_level = 1.0 / zoom_level
 local keyboard = hg.Keyboard('raw')
 
 local switch_clock = hg.GetClock()
+
+local font_rand_idx = 1
 
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
@@ -214,22 +216,28 @@ while not keyboard:Pressed(hg.K_Escape) do
 	local text_pos = hg.Vec3(res_x * 0.05, res_y * 0.05, -0.5)
 	local _osd_colors = {hg.Vec4(1.0, 0.0, 0.0, 0.8), hg.Vec4(0.0, 1.0, 0.0, 0.8), hg.Vec4(1.0, 1.0, 1.0, 1.0)}
 	local _osd_offsets = {-2.0, 1.0, 0.0}
-	if math.random(100) > 90 then 
-		font_rand_0 = math.random(4) + 1
-	end
-	if math.random(100) > 95 then 
-		font_rand_1 = math.random(5)
-	end
-	if math.random(100) > 98 then 
-		font_rand_2 = math.random(5)
-	end
-	local font_rand_idx = font_rand_0 + font_rand_1 + font_rand_2
-	for _text_loop = 1, 3 do
-		local _text_offset = hg.Vec3(res_x * 0.001 * _osd_offsets[_text_loop] * photo_state.noise_intensity, 0.0, 0.0)
-		hg.DrawText(view_id, font[font_rand_idx], osd_text, font_program, 'u_tex', 0, 
-				hg.Mat4.Identity, text_pos + _text_offset, hg.DTHA_Left, hg.DTVA_Bottom, 
-				{hg.MakeUniformSetValue('u_color', _osd_colors[_text_loop])}, 
-				{}, text_render_state)
+	-- if math.random(100) > 90 then 
+	-- 	font_rand_0 = math.random(math.floor(max_font_index/3) - 1) + 1
+	-- end
+	-- if math.random(100) > 95 then 
+	-- 	font_rand_1 = math.random(math.floor(max_font_index/3))
+	-- end
+	-- if math.random(100) > 98 then 
+	-- 	font_rand_2 = math.random(math.floor(max_font_index/3))
+	-- end
+	-- local font_rand_idx = font_rand_0 + font_rand_1 + font_rand_2
+	if photo_state.noise_intensity > 0.25 and photo_state.index_photo0 == photo_state.current_photo then
+		font_rand_idx = font_rand_idx + 1
+		if font_rand_idx > max_font_index then
+			font_rand_idx = 1
+		end
+		for _text_loop = 1, 3 do
+			local _text_offset = hg.Vec3(res_x * 0.001 * _osd_offsets[_text_loop] * photo_state.noise_intensity, 0.0, 0.0)
+			hg.DrawText(view_id, font[font_rand_idx], osd_text, font_program, 'u_tex', 0, 
+					hg.Mat4.Identity, text_pos + _text_offset, hg.DTHA_Left, hg.DTVA_Bottom, 
+					{hg.MakeUniformSetValue('u_color', _osd_colors[_text_loop])}, 
+					{}, text_render_state)
+		end
 	end
 
 	-- loop noise video
