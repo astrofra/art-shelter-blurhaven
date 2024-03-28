@@ -94,26 +94,26 @@ local photo_state = {
 
 -- photo
 photo_state.photo_table = {
-	"a_pink_unicorn_released_me_from_this_ghost_world_just_for_a_while.png",
-	"empty_ghost_world.png",
-	"in_this_ghost_world_im_going_to_disappear_if_i_cant_run.png",
-	"in_this_ghost_world_i_can_t_cross_the_bridge.png",
-	"in_this_ghost_world_i_can_t_hide.png",
-	"in_this_ghost_world_i_just_try_to_walk.png",
-	"in_this_ghost_world_i_m_falling_apart.png",
-	"in_this_ghost_world_nothing_happens.png",
-	"in_this_ghost_world_they_wont_let_me_in.png",
-	"in_this_ghost_world_they_won_t_let_me_in.png",
-	"in_this_ghost_world_the_light_stays_outside.png",
-	"in_this_ghost_world_we_are_still_waiting_for_closed_windows.png",
-	"in_this_ghost_world_you_dont_see_me.png",
-	"i_d_rather_go_away_from_this_ghost_world.png",
-	"i_know_there_s_some_light_on_the_other_side_of_the_ghost_world.png",
-	"marie_while_i_m_falling_into_this_ghost_world.png",
-	"this_ghost_world_like_a_spider_s_web.png",
-	"waiting_for_a_never_ending_rest_in_this_ghost_world.png",
-	"we_all_are_ghosts.png",
-	"what_will_i_become_in_this_ghost_world.png"
+	"a_pink_unicorn_released_me_from_this_ghost_world_just_for_a_while",
+	"empty_ghost_world",
+	"in_this_ghost_world_im_going_to_disappear_if_i_cant_run",
+	"in_this_ghost_world_i_can_t_cross_the_bridge",
+	"in_this_ghost_world_i_can_t_hide",
+	"in_this_ghost_world_i_just_try_to_walk",
+	"in_this_ghost_world_i_m_falling_apart",
+	"in_this_ghost_world_nothing_happens",
+	"in_this_ghost_world_they_wont_let_me_in",
+	"in_this_ghost_world_they_won_t_let_me_in",
+	"in_this_ghost_world_the_light_stays_outside",
+	"in_this_ghost_world_we_are_still_waiting_for_closed_windows",
+	"in_this_ghost_world_you_dont_see_me",
+	"i_d_rather_go_away_from_this_ghost_world",
+	"i_know_there_s_some_light_on_the_other_side_of_the_ghost_world",
+	"marie_while_i_m_falling_into_this_ghost_world",
+	"this_ghost_world_like_a_spider_s_web",
+	"waiting_for_a_never_ending_rest_in_this_ghost_world",
+	"we_all_are_ghosts",
+	"what_will_i_become_in_this_ghost_world"
 }
 
 -- audio
