@@ -94,12 +94,26 @@ local photo_state = {
 
 -- photo
 photo_state.photo_table = {
-	"Empty_ghost_world",
-	"In_this_ghost_world_Im_going_to_disappear_if_I_cant_run",
-	"In_this_ghost_world_they_wont_let_me_in",
-	"In_this_ghost_world_we_are_still_waiting_for_closed_windows",
-	"In_this_ghost_world_you_dont_see_me",
-	"What_will_I_become_in_this_ghost_world"
+	"a_pink_unicorn_released_me_from_this_ghost_world_just_for_a_while.png",
+	"empty_ghost_world.png",
+	"in_this_ghost_world_im_going_to_disappear_if_i_cant_run.png",
+	"in_this_ghost_world_i_can_t_cross_the_bridge.png",
+	"in_this_ghost_world_i_can_t_hide.png",
+	"in_this_ghost_world_i_just_try_to_walk.png",
+	"in_this_ghost_world_i_m_falling_apart.png",
+	"in_this_ghost_world_nothing_happens.png",
+	"in_this_ghost_world_they_wont_let_me_in.png",
+	"in_this_ghost_world_they_won_t_let_me_in.png",
+	"in_this_ghost_world_the_light_stays_outside.png",
+	"in_this_ghost_world_we_are_still_waiting_for_closed_windows.png",
+	"in_this_ghost_world_you_dont_see_me.png",
+	"i_d_rather_go_away_from_this_ghost_world.png",
+	"i_know_there_s_some_light_on_the_other_side_of_the_ghost_world.png",
+	"marie_while_i_m_falling_into_this_ghost_world.png",
+	"this_ghost_world_like_a_spider_s_web.png",
+	"waiting_for_a_never_ending_rest_in_this_ghost_world.png",
+	"we_all_are_ghosts.png",
+	"what_will_i_become_in_this_ghost_world.png"
 }
 
 -- audio
@@ -125,12 +139,15 @@ zoom_level = 1.0 / zoom_level
 
 local keyboard = hg.Keyboard('raw')
 
+local switch_clock = hg.GetClock()
+
 while not keyboard:Pressed(hg.K_Escape) do
 	keyboard:Update()
 	dt = hg.TickClock()
 
-	if photo_state.coroutine == nil and keyboard:Released(hg.K_Space) then
+	if photo_state.coroutine == nil and (keyboard:Released(hg.K_Space) or (hg.GetClock() - switch_clock > hg.time_from_sec_f(10.0))) then
 		photo_state.coroutine = coroutine.create(PhotoChangeCoroutine)
+		switch_clock = hg.GetClock()
 	elseif photo_state.coroutine and coroutine.status(photo_state.coroutine) ~= 'dead' then
 		coroutine.resume(photo_state.coroutine, photo_state)
 	else
