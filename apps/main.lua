@@ -51,9 +51,32 @@ res = hg.PipelineResources()
 
 -- text rendering
 -- load font and shader program
-local font_size = math.floor(52 * (res_x / 960.0))
-local font = hg.LoadFontFromAssets('fonts/VCR_OSD_MONO.ttf', font_size)
+local font_names = {
+	"ai_font_001.otf",
+	"ai_font_002.otf",
+	"ai_font_003.otf",
+	"ai_font_004.otf",
+	"ai_font_005.otf",
+	"ai_font_006.otf",
+	"ai_font_007.otf",
+	"ai_font_008.otf",
+	"ai_font_009.otf",
+	"ai_font_010.otf",
+	"ai_font_011.otf",
+	"ai_font_012.otf",
+	"ai_font_013.otf",
+	"ai_font_014.otf",
+	"ai_font_015.otf"
+}
+local font_size = math.floor(60 * (res_x / 960.0))
+local font = {}
+for font_idx = 1, 15 do
+	table.insert(font, hg.LoadFontFromAssets("fonts/" .. font_names[font_idx], font_size))
+end
 local font_program = hg.LoadProgramFromAssets('core/shader/font')
+local font_rand_0 = 1
+local font_rand_1 = 0
+local font_rand_2 = 0
 
 -- text uniforms and render state
 local text_uniform_values = {hg.MakeUniformSetValue('u_color', hg.Vec4(1, 1, 0, 1))}
@@ -116,6 +139,30 @@ photo_state.photo_table = {
 	"what_will_i_become_in_this_ghost_world"
 }
 
+local ghostWorldAssociations = {
+	"Escape",
+	"Void",
+	"Peril",
+	"Obstacle",
+	"Exposure",
+	"Endurance",
+	"Dissolution",
+	"Stagnation",
+	"Exclusion",
+	"Banishment",
+	"Darkness",
+	"Anticipation",
+	"Invisibility",
+	"Departure",
+	"Hope",
+	"Descent",
+	"Entanglement",
+	"Limbo",
+	"Ethereality",
+	"Transformation"
+  }
+  
+
 -- audio
 -- background noise
 local bg_snd_ref = hg.LoadWAVSoundAsset('sfx/static.wav')
@@ -171,7 +218,8 @@ while not keyboard:Pressed(hg.K_Escape) do
 	hg.DrawModel(view_id, screen_mdl, screen_prg, val_uniforms, tex_uniforms, hg.TransformationMat4(hg.Vec3(0, 0, 0), hg.Vec3(math.pi / 2, math.pi, 0)))
 
 	-- text OSD
-	osd_text = "TV" .. photo_state.index_photo0
+	-- osd_text = "TV" .. photo_state.index_photo0
+	osd_text = ghostWorldAssociations[photo_state.index_photo0]
 	view_id = view_id + 1
 
 	hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)
@@ -179,9 +227,19 @@ while not keyboard:Pressed(hg.K_Escape) do
 	local text_pos = hg.Vec3(res_x * 0.05, res_y * 0.05, -0.5)
 	local _osd_colors = {hg.Vec4(1.0, 0.0, 0.0, 0.8), hg.Vec4(0.0, 1.0, 0.0, 0.8), hg.Vec4(1.0, 1.0, 1.0, 1.0)}
 	local _osd_offsets = {-2.0, 1.0, 0.0}
+	if math.random(100) > 90 then 
+		font_rand_0 = math.random(4) + 1
+	end
+	if math.random(100) > 95 then 
+		font_rand_1 = math.random(5)
+	end
+	if math.random(100) > 98 then 
+		font_rand_2 = math.random(5)
+	end
+	local font_rand_idx = font_rand_0 + font_rand_1 + font_rand_2
 	for _text_loop = 1, 3 do
 		local _text_offset = hg.Vec3(res_x * 0.001 * _osd_offsets[_text_loop] * photo_state.noise_intensity, 0.0, 0.0)
-		hg.DrawText(view_id, font, osd_text, font_program, 'u_tex', 0, 
+		hg.DrawText(view_id, font[font_rand_idx], osd_text, font_program, 'u_tex', 0, 
 				hg.Mat4.Identity, text_pos + _text_offset, hg.DTHA_Left, hg.DTVA_Bottom, 
 				{hg.MakeUniformSetValue('u_color', _osd_colors[_text_loop])}, 
 				{}, text_render_state)
