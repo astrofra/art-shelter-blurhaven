@@ -51,28 +51,15 @@ res = hg.PipelineResources()
 
 -- text rendering
 -- load font and shader program
-local font_names = {
-	"ai_font_001.otf",
-	"ai_font_002.otf",
-	"ai_font_003.otf",
-	"ai_font_004.otf",
-	"ai_font_005.otf",
-	"ai_font_006.otf",
-	"ai_font_007.otf",
-	"ai_font_008.otf",
-	"ai_font_009.otf",
-	"ai_font_010.otf",
-	"ai_font_011.otf",
-	"ai_font_012.otf",
-	"ai_font_013.otf",
-	"ai_font_014.otf",
-	"ai_font_015.otf"
-}
+local max_font_index = 15 -- Vous pouvez changer cette valeur selon vos besoins
 local font_size = math.floor(60 * (res_x / 960.0))
 local font = {}
-for font_idx = 1, 15 do
-	table.insert(font, hg.LoadFontFromAssets("fonts/" .. font_names[font_idx], font_size))
+
+for font_idx = 1, max_font_index do
+    local font_name = string.format("ai_font_%03d.otf", font_idx)
+    table.insert(font, hg.LoadFontFromAssets("fonts/" .. font_name, font_size))
 end
+
 local font_program = hg.LoadProgramFromAssets('core/shader/font')
 local font_rand_0 = 1
 local font_rand_1 = 0
