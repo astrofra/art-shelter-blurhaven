@@ -58,6 +58,16 @@ local font = {}
 for font_idx = 1, max_font_index do
     local font_name = string.format("ai_font_%03d.otf", font_idx)
     table.insert(font, hg.LoadFontFromAssets("fonts/" .. font_name, font_size))
+
+	-- progress feedback on screen
+	local progress_value = font_idx / max_font_index
+	hg.SetViewClear(0, hg.CF_Color | hg.CF_Depth, hg.Color(progress_value, progress_value, progress_value, 1.0), 1, 0)
+	hg.SetViewRect(0, 0, 0, res_x, res_y)
+
+	hg.Touch(0)  -- force the view to be processed as it would be ignored since nothing is drawn to it (a clear does not count)
+
+	hg.Frame()
+	hg.UpdateWindow(win)
 end
 
 local font_program = hg.LoadProgramFromAssets('core/shader/font')
@@ -123,7 +133,9 @@ photo_state.photo_table = {
 	"this_ghost_world_like_a_spider_s_web",
 	"waiting_for_a_never_ending_rest_in_this_ghost_world",
 	"we_all_are_ghosts",
-	"what_will_i_become_in_this_ghost_world"
+	"what_will_i_become_in_this_ghost_world",
+	"the_day_i_failed_to_escape_this_ghost_world",
+	"there_s_no_way_to_escape_this_ghost_world"
 }
 
 local ghostWorldAssociations = {
@@ -146,7 +158,9 @@ local ghostWorldAssociations = {
 	"Entanglement",
 	"Limbo",
 	"Ethereality",
-	"Transformation"
+	"Transformation",
+	"Failure",
+	"Imprisonment"
   }
   
 
