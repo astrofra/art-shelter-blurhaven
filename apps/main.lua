@@ -114,7 +114,7 @@ local photo_state = {
 
 -- photo
 photo_state.photo_table = {
-	"a_pink_unicorn_released_me_from_this_ghost_world_just_for_a_while",
+	-- "a_pink_unicorn_released_me_from_this_ghost_world_just_for_a_while",
 	"empty_ghost_world",
 	"in_this_ghost_world_im_going_to_disappear_if_i_cant_run",
 	"in_this_ghost_world_i_can_t_cross_the_bridge",
@@ -122,8 +122,8 @@ photo_state.photo_table = {
 	"in_this_ghost_world_i_just_try_to_walk",
 	"in_this_ghost_world_i_m_falling_apart",
 	"in_this_ghost_world_nothing_happens",
-	-- "in_this_ghost_world_they_wont_let_me_in",
-	"in_this_ghost_world_they_won_t_let_me_in",
+	"in_this_ghost_world_they_wont_let_me_in",
+	-- "in_this_ghost_world_they_won_t_let_me_in",
 	"in_this_ghost_world_the_light_stays_outside",
 	"in_this_ghost_world_we_are_still_waiting_for_closed_windows",
 	"in_this_ghost_world_you_dont_see_me",
@@ -139,7 +139,7 @@ photo_state.photo_table = {
 }
 
 local ghostWorldAssociations = {
-	"Escape",
+	-- "Escape",
 	"Void",
 	"Peril",
 	"Obstacle",
