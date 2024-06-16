@@ -1,4 +1,4 @@
--- Copyright (c) NWNC HARFANG and contributors. All rights reserved.
+-- Copyright (c) Astrofra
 -- Licensed under the MIT license. See LICENSE file in the project root for details.
 
 function LoadPhotoFromTable(_photo_table, _photo_idx)
