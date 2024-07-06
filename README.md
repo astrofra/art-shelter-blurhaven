@@ -1,6 +1,6 @@
 # Art Shelter: BlurHaven, aka `Floupocalypse`
 
-"BlurHaven" is an immersive art installation for XUL 2024, set in a post-epidemic world where an enigmatic condition renders all life forms blurry, challenging our perceptions of reality and existence in a uniquely crafted shelter environment.
+"BlurHaven" is an immersive art installation for XUL 2024, set in a post-epidemic world where an enigmatic condition renders all life forms blurry, challenging our perceptions of reality and existence in a uniquely crafted shelter environment. It is mostly made of photos, both digital and film, by the artist [MadMarie](https://www.flickr.com/photos/38623641@N05/albums).
 
 This repository contains the software and data (mostly digital photos) that was part of the installation. The software simulates a slideshow as if it was broadcasted on an analogic TV network. The code is written in Lua, running on the [HARFANG](https://github.com/harfang3d/) framework.
 
