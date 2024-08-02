@@ -6,4 +6,6 @@ This repository contains the software and data (mostly digital photos) that was 
 
 [![Installation at XUL 2024](img/installation-lq.png)](img/installation-hd.png)
 
+[Video preview (Youtube)](https://www.youtube.com/watch?v=rtAssrBZ92o)
+
 _Presented at [XUL 2024](https://xul.labomedia.org/floupocalypse-madmarie/) in Orléans._
